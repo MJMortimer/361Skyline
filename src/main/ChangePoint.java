@@ -24,6 +24,10 @@ public class ChangePoint {
 	public LeftRight getSide() {
 		return side;
 	}
+	
+	public boolean isLeft(){
+		return this.side == LeftRight.L;
+	}
 
 	@Override
 	public String toString() {
