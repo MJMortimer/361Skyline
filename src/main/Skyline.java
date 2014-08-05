@@ -35,20 +35,16 @@ public class Skyline {
 		List<Building> firstHalfBuildings = new ArrayList<Building>(inputBuildings.subList(0, mid));
 		List<Building> secondHalfBuildings = new ArrayList<Building>(inputBuildings.subList(mid, inputBuildings.size()));
 		
+		//For each half list run divideAndConquer
 		List<ChangePoint> firstHalfSkyline = divideAndConquer(firstHalfBuildings);
 		List<ChangePoint> secondHalfSkyline = divideAndConquer(secondHalfBuildings);
 		
 		System.out.println("FHS:   "+firstHalfSkyline);
 		System.out.println("SHS:   "+secondHalfSkyline);
 		
-		//For each half list run divideAndConquer
-		//Combine (Calculate the skyline)
 		
-		
-		
-		
-		
-		return null;
+		//Combine (Calculate the skyline)		
+		return currentSkyline;
 	}
 	
 
