@@ -14,6 +14,18 @@ public class Building {
 		height = Float.parseFloat(strings[2]);		
 	}
 
+	public float getLeft() {
+		return left;
+	}
+
+	public float getRight() {
+		return right;
+	}
+
+	public float getHeight() {
+		return height;
+	}
+
 	@Override
 	public String toString() {
 		return "Building [left=" + left + ", right=" + right + ", height="
