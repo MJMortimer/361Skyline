@@ -12,9 +12,16 @@ public class Skyline {
 		System.out.println(buildings);
 	}
 	
-	public void calculateSkyline(){
-		
+	public void divideAndConquer(){
+		//if input size is 1, (one building),
+			//Do Direct Case (rectangle of single building)
+		//else if size > 1
+			//Divide (Split input list in two)
+			//For each half list run divideAndConquer
+			//Combine (Calculate the skyline)
 	}
+	
+
 
 	
 	public static void main(String[] args){
