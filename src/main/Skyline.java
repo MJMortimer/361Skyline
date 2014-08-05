@@ -9,6 +9,11 @@ public class Skyline {
 	
 	public Skyline(List<Building> buildings){
 		this.buildings = buildings;
+		System.out.println(buildings);
+	}
+	
+	public void calculateSkyline(){
+		
 	}
 
 	
