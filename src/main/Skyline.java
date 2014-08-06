@@ -1,6 +1,5 @@
 package main;
 
-import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,18 +7,26 @@ import main.ChangePoint.LeftRight;
 
 public class Skyline {
 
-	private List<Building> buildings;
+	private List<Building> _buildings;
+	private List<ChangePoint> _skyline;
 
 	public Skyline(List<Building> buildings){
-		this.buildings = buildings;
+		this._buildings = buildings;
+	}
+
+	public Skyline(String[] buildings){
+		List<Building> buildingsList = new ArrayList<Building>();
+		for(String building : buildings){
+			buildingsList.add(new Building(building));
+		}
+		this._buildings = buildingsList;
 	}
 
 	public void runAlgorithm(){
-		List<ChangePoint> skyline = divideAndConquer(buildings);
-		System.out.println(skyline);
+		_skyline = computeSkyline(_buildings);		
 	}
 
-	private List<ChangePoint> divideAndConquer(List<Building> inputBuildings){
+	public List<ChangePoint> computeSkyline(List<Building> inputBuildings){
 		List<ChangePoint> currentSkyline = new ArrayList<ChangePoint>();
 		//if input size is 1, (one building),
 		//Do Direct Case (rectangle of single building)
@@ -37,16 +44,16 @@ public class Skyline {
 		List<Building> secondHalfBuildings = new ArrayList<Building>(inputBuildings.subList(mid, inputBuildings.size()));
 
 		//For each half list run divideAndConquer
-		List<ChangePoint> firstHalfSkyline = divideAndConquer(firstHalfBuildings);
-		List<ChangePoint> secondHalfSkyline = divideAndConquer(secondHalfBuildings);
-		currentSkyline = combineSkylines(firstHalfSkyline, secondHalfSkyline);
-
-		//System.out.println("FHS:   "+firstHalfSkyline);
-		//System.out.println("SHS:   "+secondHalfSkyline);
-
+		List<ChangePoint> firstHalfSkyline = computeSkyline(firstHalfBuildings);
+		List<ChangePoint> secondHalfSkyline = computeSkyline(secondHalfBuildings);
 
 		//Combine (Calculate the skyline)
+		currentSkyline = combineSkylines(firstHalfSkyline, secondHalfSkyline);
 
+		return currentSkyline;
+	}
+
+	private List<ChangePoint> combineSkylines(List<ChangePoint> firstHalf, List<ChangePoint> secondHalf){
 		//If comparing 2 L points
 		//If same x 
 		//take point with larger y. discard one with smaller
@@ -64,10 +71,6 @@ public class Skyline {
 		//Else (comparing different L R points)
 		//add point with smaller x keep other.
 
-		return currentSkyline;
-	}
-
-	public List<ChangePoint> combineSkylines(List<ChangePoint> firstHalf, List<ChangePoint> secondHalf){
 		float currentHighestLeftSet1 = 0.0f;
 		float currentHighestLeftSet2 = 0.0f;
 
@@ -87,10 +90,12 @@ public class Skyline {
 					if(first.getY() > second.getY()){
 						currentSkyline.add(first);
 						currentHighestLeftSet1 = first.getY();
+						currentHighestLeftSet2 = second.getY();
 						fInd++;
 						sInd++;
 					}else if(first.getY() < second.getY()){
 						currentSkyline.add(second);
+						currentHighestLeftSet1 = first.getY();
 						currentHighestLeftSet2 = second.getY();
 						fInd++;
 						sInd++;
@@ -122,8 +127,10 @@ public class Skyline {
 					if(currentHighestLeftSet2 > currentHighestLeftSet1){
 						ChangePoint newPoint = new ChangePoint(second.getX(), currentHighestLeftSet1, LeftRight.R);
 						currentSkyline.add(newPoint);
+						currentHighestLeftSet2 = 0.0f; //need to reset as we have use a right
 						sInd++;
 					}else if(currentHighestLeftSet2 <= currentHighestLeftSet1){
+						currentHighestLeftSet2 = 0.0f;
 						sInd++;
 					}
 					//if first x is smaller
@@ -131,8 +138,10 @@ public class Skyline {
 					if(currentHighestLeftSet1 > currentHighestLeftSet2){
 						ChangePoint newPoint = new ChangePoint(first.getX(), currentHighestLeftSet2, LeftRight.R);
 						currentSkyline.add(newPoint);
+						currentHighestLeftSet1 = 0.0f; //need to reset as we have used a right
 						fInd++;
 					}else if(currentHighestLeftSet1 <= currentHighestLeftSet2){
+						currentHighestLeftSet1 = 0.0f;
 						fInd++;
 					}					
 				}else if(first.getX() == second.getX()){
@@ -146,16 +155,30 @@ public class Skyline {
 			//one left one right
 			if((first.isLeft() && !second.isLeft()) || (!first.isLeft() && second.isLeft())){
 				if(first.getX() < second.getX()){
-					currentSkyline.add(first);
-					fInd++;
-					if(first.isLeft()){
-						currentHighestLeftSet1 = first.getY();
-					}
+					if(!second.isLeft() && currentHighestLeftSet2 >= first.getY()){
+						currentSkyline.add(second);
+						currentHighestLeftSet2 = 0.0f;
+						sInd++;
+						fInd++;//remove first point as it is consumed
+					}else{					
+						currentSkyline.add(first);
+						fInd++;
+						if(first.isLeft()){
+							currentHighestLeftSet1 = first.getY();
+						}
+					}	
 				}else if(first.getX() > second.getX()){
-					currentSkyline.add(second);
-					sInd++;
-					if(second.isLeft()){
-						currentHighestLeftSet2 = second.getY();
+					if(!first.isLeft() && currentHighestLeftSet1 >= second.getY()){
+						currentSkyline.add(first);
+						currentHighestLeftSet1 = 0.0f;
+						fInd++;
+						sInd++;//remove second point as it is consumed
+					}else{
+						currentSkyline.add(second);
+						sInd++;
+						if(second.isLeft()){
+							currentHighestLeftSet2 = second.getY();
+						}
 					}
 				}else if(first.getX() == second.getX()){
 					if(first.isLeft()){
@@ -174,16 +197,39 @@ public class Skyline {
 			continue;
 		}
 
-		
-		
-			
+
+
+		//only one of the following loops will run as only one set list will still have unchecked points
+		boolean needCheck = true;
 		while(fInd < firstHalf.size()){
+			if(!firstHalf.get(fInd).isLeft() && currentHighestLeftSet1 == 0.00f && needCheck){
+				fInd++;
+				continue;
+			}
 			currentSkyline.add(firstHalf.get(fInd));
+			if(firstHalf.get(fInd).isLeft()){
+				currentHighestLeftSet1 = firstHalf.get(fInd).getY();
+			}else{
+				currentHighestLeftSet1 = 0.00f;
+				needCheck = false;
+			}
 			fInd++;
 		}
-			
+
+		needCheck = true;
 		while(sInd < secondHalf.size()){
+			if(!secondHalf.get(sInd).isLeft() && currentHighestLeftSet2 == 0.00f && needCheck){
+				sInd++;
+				continue;
+			}
 			currentSkyline.add(secondHalf.get(sInd));
+			if(secondHalf.get(sInd).isLeft()){
+				currentHighestLeftSet2 = secondHalf.get(sInd).getY();
+			}
+			else{
+				currentHighestLeftSet2 = 0.00f;
+				needCheck = false;
+			}
 			sInd++;
 		}
 
@@ -191,17 +237,13 @@ public class Skyline {
 		return currentSkyline;
 	}
 
-
-
-
 	public static void main(String[] args){
-		List<Building> buildings = new ArrayList<Building>();
-		for(String building : args){
-			buildings.add(new Building(building));
-		}
-
-		Skyline sky = new Skyline(buildings);
+		Skyline sky = new Skyline(args);
 		sky.runAlgorithm();
+		System.out.println(sky.getSkyline());
+	}
 
+	public List<ChangePoint> getSkyline() {
+		return this._skyline;
 	}
 }

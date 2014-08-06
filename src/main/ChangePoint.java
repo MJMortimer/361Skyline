@@ -31,7 +31,7 @@ public class ChangePoint {
 
 	@Override
 	public String toString() {
-		return "ChangePoint [x=" + x + ", y=" + y + ", side=" + side + "]";
+		return String.format("(%4.2f,%4.2f)", x,y);
 	}
 
 	public enum LeftRight{
