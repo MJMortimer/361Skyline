@@ -86,15 +86,18 @@ public class Skyline {
 					currentHeight2 = second.getY();
 				}else if((first.isLeft() && !second.isLeft()) || (!first.isLeft() && second.isLeft())){	//ONE LEFT ONE RIGHT
 					if(first.getY() > second.getY()){
-						currentSkyline.add(first);						
+						ChangePoint newPoint = new ChangePoint(first.getX(), first.getY(), LeftRight.R);
+						currentSkyline.add(newPoint);						
 						fInd++;
 						sInd++;						
 					}else if(first.getY() < second.getY()){
-						currentSkyline.add(second);
+						ChangePoint newPoint = new ChangePoint(second.getX(), second.getY(), LeftRight.R);
+						currentSkyline.add(newPoint);		
 						fInd++;
 						sInd++;
 					}else if(first.getY() == second.getY()){
-						currentSkyline.add(first);
+						ChangePoint newPoint = new ChangePoint(second.getX(), second.getY(), LeftRight.R);
+						currentSkyline.add(newPoint);
 						fInd++;
 						sInd++;	
 					}
